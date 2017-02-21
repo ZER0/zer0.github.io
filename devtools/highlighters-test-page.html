@@ -1,0 +1,833 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset=utf-8 />
+  <meta name="author" content="Matteo Ferretti" />
+  <link rel="author" href="https://twitter.com/zer0" />
+  <link rel="shortcut icon" type="image/svg+xml" />
+  
+  <title>Highlighters test page</title>
+  <style>
+    /* assets */
+    :root {
+      --box-model-icon: url(data:image/svg+xml;charset=utf-8;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiBmaWxsPSIjMGIwYjBiIiA+DQogIDxwYXRoIGQ9Ik0xNSA3LjY2N1YzLjAwMkExLjAxIDEuMDEgMCAwIDAgMTMuOTkzIDJIMi4wMDdDMS40NSAyIDEgMi40NDkgMSAzLjAwMnY5Ljk5NkMxIDEzLjU0NCAxLjQ1IDE0IDIuMDA3IDE0aDYuODE4bC0uMzctMUgyVjNoMTJ2NC4zMzRsMSAuMzMzeiIvPg0KICA8cGF0aCBmaWxsLW9wYWNpdHk9Ii4zIiBkPSJNOSA4bDEuOTgxIDUuODQzIDQuMDQ0LTMuOTY2eiIvPg0KICA8cGF0aCBkPSJNOC41MjYgOC4xNmwxLjk4MiA1Ljg0NGEuNS41IDAgMCAwIC44MjQuMTk2bDQuMDQzLTMuOTY2YS41LjUgMCAwIDAtLjIwMi0uODM1TDkuMTUgNy41MjNhLjUuNSAwIDAgMC0uNjIzLjYzOHptLjk0OC0uMzJsLS42MjMuNjM3IDYuMDI1IDEuODc3LS4yMDEtLjgzNC00LjA0NCAzLjk2Ni44MjQuMTk3LTEuOTgxLTUuODQ0eiIvPg0KICA8cGF0aCBkPSJNMTIuNjc0IDEyLjM5bDEuOTczIDEuOTY0YS41LjUgMCAxIDAgLjcwNi0uNzA4TDEzLjM4IDExLjY4YS41LjUgMCAwIDAtLjcwNi43MDl6Ii8+DQo8L3N2Zz4=);
+
+      /* CSS Grid icon seems still not working well compared to the others, it should be fixed. */
+      --css-grid-icon: url(data:image/svg+xml;charset=utf-8;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiBzdHJva2U9IiM2OTY5NjkiPg0KICA8cGF0aCBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZD0iTTIgNGgxMk0yIDhoMTJNMiAxMmgxMk00IDE0VjJNOCAxNFYyTTEyIDE0VjIiLz4NCjwvc3ZnPg==);
+      
+      /* This icon it doesn't actually exists in devtools */
+      --css-transform-icon: url(data:image/svg+xml;charset=utf-8;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+aWNvbjwvdGl0bGU+PGcgc3Ryb2tlPSIjMDAwIiBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0xLjUgNy41aDl2OGgtOXoiLz48cGF0aCBkPSJNOS4xMzcgMS40NThMMTUuNSA3LjgyMmwtNS42NTYgNS42NTZMMy40OCA3LjExNXoiLz48L2c+PC9zdmc+);
+
+      /* selector's icon is still in png format, it should be updated. */
+      --selector-icon: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAZQTFRFAAAA////pdmf3QAAAAJ0Uk5T/wDltzBKAAAANklEQVR42mJgJAAYSFTAwDBwChgwwMAoQHYqvRWgOwtVhBgFg8EXgyU2B0Oqpl7eJEMBQIABABJ6AwFyn2SJAAAAAElFTkSuQmCC);
+
+      --geometry-editor-icon: url(data:image/svg+xml;charset=utf-8;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiBmaWxsPSIjMGIwYjBiIj4NCiAgPHBhdGggZD0iTTE0LDggTDEyLDggTDEyLDExLjI1IEwxMiwxMiBMMTEuNSwxMiBMMy41LDEyIEwzLDEyIEwzLDExLjc1IEwzLDExLjUgTDMsOCBMMSw4IEwxLDggTDEsOC41IEwxLDkgTDAsOSBMMCw4LjUgTDAsNi41IEwwLDYgTDEsNiBMMSw2LjUgTDEsNyBMMyw3IEwzLDMuNSBMMywzIEwzLjcyMjIyMjIyLDMgTDMuNzIyMjIyMjIsMyBMMTAuNTU1NTU1NiwzIEwxMSwzIEwxMSw0IEwxMC41NTU1NTU2LDQgTDQsNCBMNCwxMSBMMTEsMTEgTDExLDMuNSBMMTEsMyBMMTIsMyBMMTIsMy41IEwxMiw3IEwxNCw3IEwxNCw2LjUgTDE0LDYgTDE1LDYgTDE1LDYuNSBMMTUsOC41IEwxNSw5IEwxNCw5IEwxNCw4LjUgTDE0LDggWiBNOCwxNCBMOC41LDE0IEw5LDE0IEw5LDE1IEw4LjUsMTUgTDYuNSwxNSBMNiwxNSBMNiwxNCBMNi41LDE0IEw3LDE0IEw3LDExLjUgTDcsMTEgTDgsMTEgTDgsMTEuNSBMOCwxNCBaIE03LDEgTDYuNSwxIEw2LDEgTDYsMCBMNi41LDAgTDguNSwwIEw5LDAgTDksMSBMOC41LDEgTDgsMSBMOCwzLjUgTDgsNCBMNyw0IEw3LDMuNSBMNywxIEw3LDEgWiIvPg0KICA8cGF0aCBkPSJNMy41LDkgQzQuMzI4NDI3MTIsOSA1LDguMzI4NDI3MTIgNSw3LjUgQzUsNi42NzE1NzI4OCA0LjMyODQyNzEyLDYgMy41LDYgQzIuNjcxNTcyODgsNiAyLDYuNjcxNTcyODggMiw3LjUgQzIsOC4zMjg0MjcxMiAyLjY3MTU3Mjg4LDkgMy41LDkgWiBNNy41LDEzIEM4LjMyODQyNzEyLDEzIDksMTIuMzI4NDI3MSA5LDExLjUgQzksMTAuNjcxNTcyOSA4LjMyODQyNzEyLDEwIDcuNSwxMCBDNi42NzE1NzI4OCwxMCA2LDEwLjY3MTU3MjkgNiwxMS41IEM2LDEyLjMyODQyNzEgNi42NzE1NzI4OCwxMyA3LjUsMTMgWiBNMTEuNSw5IEMxMi4zMjg0MjcxLDkgMTMsOC4zMjg0MjcxMiAxMyw3LjUgQzEzLDYuNjcxNTcyODggMTIuMzI4NDI3MSw2IDExLjUsNiBDMTAuNjcxNTcyOSw2IDEwLDYuNjcxNTcyODggMTAsNy41IEMxMCw4LjMyODQyNzEyIDEwLjY3MTU3MjksOSAxMS41LDkgWiBNNy41LDUgQzguMzI4NDI3MTIsNSA5LDQuMzI4NDI3MTIgOSwzLjUgQzksMi42NzE1NzI4OCA4LjMyODQyNzEyLDIgNy41LDIgQzYuNjcxNTcyODgsMiA2LDIuNjcxNTcyODggNiwzLjUgQzYsNC4zMjg0MjcxMiA2LjY3MTU3Mjg4LDUgNy41LDUgWiIvPg0KPC9zdmc+);
+
+      --rulers-icon: url(data:image/svg+xml;charset=utf-8;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0iIzBiMGIwYiI+DQogIDxwYXRoIGQ9Ik0xMS40IDNjLS4yIDAtLjQuMi0uNC40djIuNWMwIC4yLjMuNC41LjRzLjUtLjIuNS0uNFYzLjRjMC0uMi0uMy0uNC0uNS0uNE0xMy41IDMuMmMtLjIgMC0uNS4yLS41LjR2MS41YzAgLjIuMy40LjUuNHMuNS0uMi41LS40VjMuNmMwLS4yLS4zLS40LS41LS40TTkuNiAzLjJjLS4yIDAtLjYuMi0uNi40djEuNWMwIC4yLjMuNC42LjQuMiAwIC40LS4yLjQtLjRWMy42YzAtLjItLjItLjQtLjQtLjRNNy40IDNjLS4yIDAtLjQuMi0uNC40djIuNWMwIC4yLjMuNC41LjRzLjUtLjIuNS0uNFYzLjRjMC0uMi0uMi0uNC0uNi0uNE01LjUgMy4yYy0uMyAwLS41LjItLjUuNHYxLjVjMCAuMi4zLjQuNS40cy41LS4yLjUtLjRWMy42YzAtLjItLjMtLjQtLjUtLjRNNC4zIDguNWMwLS4yLS4yLS41LS40LS41SDIuNGMtLjIgMC0uNC4zLS40LjVzLjIuNS40LjVoMS41Yy4yIDAgLjQtLjMuNC0uNU00LjMgMTIuNWMwLS4yLS4yLS41LS40LS41SDIuNGMtLjIgMC0uNC4zLS40LjVzLjIuNS40LjVoMS41Yy4yIDAgLjQtLjMuNC0uNU01LjEgMTAuNWMwLS4yLS4yLS41LS40LS41SDMuMmMtLjIgMC0uNC4zLS40LjVzLjIuNS40LjVoMS41Yy4yIDAgLjQtLjMuNC0uNU01LjEgNi41YzAtLjItLjItLjUtLjQtLjVIMy4yYy0uMiAwLS40LjMtLjQuNXMuMi41LjQuNWgxLjVjLjIgMCAuNC0uMy40LS41Ii8+DQogIDxwYXRoIGQ9Ik0xNS4xIDNIMy41QzIuOSAzIDIgMy42IDIgNC4xVjE0YzAgLjYgMSAxIDEuNSAxaDMuMmMuNiAwIDEuMy0uNSAxLjMtMVY5aDdjLjYgMCAxLS40IDEtLjl2LTRjMC0xLS40LTEuMS0uOS0xLjF6TTE1IDhINy40Yy0uNiAwLS41LjEtLjQgMHY2SDNWNGgxMnY0eiIvPg0KPC9zdmc+);
+
+      --measuring-tool-icon: url(data:image/svg+xml;charset=utf-8;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0iIzBiMGIwYiI+DQogIDxwYXRoIGQ9Ik0xIDExaDE0VjZIMXY1em0xNSAuMmMwIC41LS40LjgtLjguOEguOGMtLjQgMC0uOC0uNC0uOC0uOFY1LjhjMC0uNC40LS44LjgtLjhoMTQuM2MuNSAwIC45LjQuOS44djUuNHoiLz4NCiAgPHBhdGggZD0iTTkgNnYzYzAgLjIuMy40LjUuNHMuNS0uMi41LS40VjZIOXpNMTMgNnYzYzAgLjIuMy40LjUuNC4yLS4xLjUtLjIuNS0uNFY2aC0xek01LjEgNS43TDQgNnYyLjhjMCAuMi40LjQuNi40cy41LS4yLjUtLjRWNS43ek0xMSA1djIuN2MwIC4yLjMuNC41LjRzLjUtLjIuNS0uNFY1aC0xek02IDUuMXYyLjZjMCAuMi41LjQuNy40LjIgMCAuNi0uMi42LS40bC0uMS0yLjZINnpNMiA1LjF2Mi42YzAgLjIuMy40LjUuNHMuNS0uMi41LS40VjUuMUgyeiIvPg0KPC9zdmc+);
+
+      --eye-dropper-icon: url(data:image/svg+xml;charset=utf-8;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0iIzBiMGIwYiI+DQogIDxwYXRoIGQ9Ik04LjMgMi45bDQuOSA0LjljLjIuMi41LjQuOC4xLjItLjIuMS0uNS0uMS0uOEwxMS42IDVsMS44LTEuOGMuMi0uMi40LS41LjEtLjgtLjItLjItLjUtLjEtLjguMUwxMSA0LjNsLTIuMS0yYy0uMi0uMy0uNS0uNC0uOC0uMi0uMi4zLS4xLjYuMi44ek0xMC40IDcuNGwtNi4xIDYtMi40LjguNy0yLjQgNi4yLTYuMS0uNy0uN0wyIDExYy0uMS4xLS4yLjMtLjIuNEwxIDEzLjdzLS4xLjcuMSAxYy4zLjMuOS4zIDEuMi4ybDIuMy0uOGMuMi0uMS4zLS4xLjQtLjNMMTEgOGwtLjYtLjZ6Ii8+DQogIDxwYXRoIG9wYWNpdHk9IjAuNSIgZD0iTTcuMSA3LjFsLTQuMiAzLjgtMS40IDMuNSAyLjktLjYgMi44LTIuN3oiLz4NCjwvc3ZnPg==);
+
+      --scissor: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAAA0CAYAAAA62j4JAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAABM5JREFUeNrkWgdoFUEQvST23sWAUSNYo2JXFLtYEEXFgooigg3sBWwIUVGxV+woFrBhF+yioGKLvYGi0ajYe4nG7wy8r+exu7eX3P3/zz/wCD+3s7szuzsz++7iDMPIS5hIGE2IJVw3okxWEQImTIsm42MILwjFLf+fRZhg+l2X0JRQmlCW8IvwinCVsIuQJug7Fu0iXnZZdkAQyYTahIOS50FkEDYSylv6zQ4HR7wkEB7bGKmLAX49Cry1H7jkhOl+dQJv4WsuOWGwX50w2CUHfBLEhIiUOEvUXk6Il7R9S9hCWEM4ifaJkrY5gAN+Wv2+ihW9iGBplW6EbxKdl4RiYbaJF6kVYTxhBKGJZdH/kbUSQ54gSMpkkMJxPcNofGPCJcGcbhI6ihSOSoyYbDMQb/UUie6MMBhekLBSI05xfZMQC6UChHKSDlNsBkwnnJU8KxRi4/lI3iYM1GjbjlAp1lS15czCwAGH//eijuEV3UYopdF+K+LTYXM2uCzZKlNtOsuJO4FId0oIjB9L+KiZnrnYa6PyikjpqeJ4sAxVDNjZQ8PrIDvp1iZzEK+kMkShfEOS83sRfkp0riENeVG7LHZg+AVCkuo6HJTCOAZlJW25utuH1MIkSkvkVZlwYFyBttlwfb6Dbfg+k8Z3gvEJGm0/gOhZ5mSAYS6VwjIwP/AGTpykGbBYShB2Ohhnj4O+tfkBL8C7agOhok2M+aDZ3xPskiwJR/UzIXSCuWjKZZpHNcI5B/qLkM5dkTyEzWFwwnXEFabjfmjqXCHU8yrVtMcAgQjEZ8IYN0hRnTacc1sjFTKBmtsB4RkMfiVx1vO5sDB7ERvS/Ea48J2jK2E34YtgVR+hnl+gKMq6G/+JDBcYuNQUg9Iszxab7ivZ7Kq6SJYGhCWEZwIH3CU0Qo1gDnK1oVud0MHNyejy9lwdtsDfzMaA4ihJEzXHzcBFZyF+86u72Vj99YRxqC49Ffb8IUW97xWOE8pgDklIj9Y2bHwfL7m0eWFIbcwj9sAc8uN+b6dzjFDB7WOxPwzGM9tc1LL73mnqfkXccEXWhdBoPudHCPUV80lGDNHpjwnPhlkxvl8IjOYSNxW1exXNeVUmnHYwxipcwx1lgTwgD6ooovIJcAbceVMV0QC2Zhv6jUPQ4jR3Dzk+PRMLxBT8THAXdsJjjCJsd2P1U0252CwjbZgYL6QIjNLdDUyWxut0LLv9MYFRVaE3RjF4ew9TNPd9X9MJH1FHKOVCJl9u8Ba/JdGd6HGdwvf/+TieuvxgTdm2SpUo6TAsKyS6S0NUXtcwxK/BZJiPuPSHtf0FL4rku8YEfigKqlDIVcSokaDP7GQUbqNNghPkguOhpHGSRtVYV/LsXYgvWosw330abW/jQmZbADGVXVDRUW/FVusXxltnFyyqdU7PCf1FCqqvQ7haE73obA6OX6TzOivUtEvC9Qq/vJmLYN4VQVsouRTRPEg5zwIjwx7calOibvAjWTHUpXL3p0bsiDjhty+nXHLAeL8Zz0EuxSXjl/vNeP5QwK3vAyf48dxvkhjDxGVbwnkNw/n7olp+ND7GEH/Ottr4+50NFzr8PU0z3KpKmzg5zho7UIn5VjYLyISokmK4zJxBLR1VEhMIBIxolt8CDADaCt50DtKWHAAAAABJRU5ErkJggg==);
+    }
+    html {
+      background: linear-gradient(0deg, #27344C, #4A6289) fixed;
+    }
+
+    body {
+      font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", sans-serif;
+      color: #283037;
+      font-size: 16px;
+      line-height: 1.5em;
+      margin: 2em auto 3em auto;
+      width: 80%;
+      min-width: 500px;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.85);
+      scroll-behavior: smooth;
+      padding-bottom: 2em;
+      border: 2px solid #353c46;
+    }
+
+    body > header {
+      background: #353c46;
+      color: #fff;
+    }
+    body > header h1 {
+      padding: 0.5em 1em;
+      margin: 0;
+    }
+
+    article {
+      padding-left: 40%;
+    }
+
+    article section {
+      padding: 0 2em;
+      min-width: 200px;
+      border:1px solid transparent;
+    }
+
+    #box-model {
+      --color: #1abc9c;
+    }
+
+    #css-grid {
+      --color: #2ecc71;
+    }
+
+    #css-transform {
+      --color: #3498db;
+    }
+
+    #selector {
+      --color: #9b59b6;
+    }
+
+    #geometry-editor {
+      --color: #e74c3c;
+    }
+
+    #rulers {
+      --color: #e67e22;
+    }
+
+    #measuring-tool {
+      --color: #d35400;
+    }
+
+    #eye-dropper {
+      --color: #c0392b;
+    }
+
+    article section h2 {
+      margin-top: 2.2em;
+      border-bottom: 0.5em solid var(--color);
+      position: sticky;
+      top: 1.8em;
+      padding-top: .5em;
+      background: #fff;
+    }
+
+    #playground {
+      position: sticky;
+      top: 3em;
+      left: 0;
+      width: 40%;
+      height: calc(100vh - 4em);
+      float: left;
+      margin: 0.5em;
+      padding: 0.5em;
+      font-family: "Lucida Sans Typewriter", "Lucida Console", Monaco, "Bitstream Vera Sans Mono", monospace;
+      font-size: 14px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      box-sizing: border-box;
+    }
+
+    #playground h1 {
+      margin-bottom: 1.5em;
+    }
+
+    #playground footer {
+      background: #fff var(--scissor);
+      width: 32px;
+      height: 26px;
+      background-size: 100%;
+      position: relative;
+      top: 14px;
+      left: 1em;
+    }
+
+    #playground section {
+      position: relative;
+      background: #f2f2f2;
+      border: 1px solid gray;
+      min-height: 120px;
+      margin: 1.5em 0 3em 0; 
+      border-bottom-width: 3px;
+    }
+
+    #playground section h4 {
+      position: absolute;
+      top: 0;
+      left: .5em;
+      margin: -1.5em 0 0 0;
+      background: #f2f2f2;
+      border: 1px solid gray;
+      border-bottom: 0;
+      padding: 0 1em;
+    }
+
+    nav {
+      position: sticky;
+      background: #fff;
+      top: 0;
+      font-size: 1vw;
+      z-index: 1;
+    }
+
+    nav ul {
+      background-clip: padding-box;;
+      border-bottom: 1px solid #95a5a6;
+      list-style: none;
+      display: flex;
+      justify-content: center;
+      white-space: nowrap;
+      padding: 0;
+      background: linear-gradient(-180deg, #95a5a6 1px, transparent 1px) no-repeat;
+    }
+
+    nav ul li {
+      border: 1px solid #95a5a6;
+      margin-top: 0px;
+      margin-left: -1px;
+      margin-bottom: -1px;
+      padding-left: 8px;
+      transition: background 0.3s;
+    }
+
+    nav ul li:hover {
+      background-color: #95a5a6;
+      color: #000;
+    }
+
+    nav ul li a {
+      text-decoration: none;
+      padding: 1em;
+      display: inline-block;
+      text-indent: 8px;
+      background: no-repeat left center;
+      background-size: 16px;
+    }
+
+    nav ul li:hover a {
+      filter:invert(1);
+    }
+
+    [class$=-icon]::before {
+      content: "";
+      width: 16px;
+      height: 16px;
+      display: inline-block;
+      margin-right: 4px;
+      background-size: 16px;
+    }
+
+    nav a[href="#box-model"],
+    .box-model-icon::before {
+      background-image: var(--box-model-icon);
+    }
+
+    nav a[href="#css-grid"],
+    .css-grid-icon::before {
+      background-image: var(--css-grid-icon);
+    }
+
+    nav a[href="#css-transform"],
+    .css-transform-icon::before {
+      background-image: var(--css-transform-icon);
+    }
+    
+    nav a[href="#selector"],
+    .selector-icon::before {
+      background-image: var(--selector-icon);
+    }
+
+    nav a[href="#geometry-editor"],
+    .geometry-editor-icon::before {
+      background-image: var(--geometry-editor-icon);
+    }
+
+
+    nav a[href="#rulers"],
+    .rulers-icon::before {
+      background-image: var(--rulers-icon);
+    }
+
+    nav a[href="#measuring-tool"],
+    .measuring-tool-icon::before {
+      background-image: var(--measuring-tool-icon);
+    }
+
+    nav a[href="#eye-dropper"],
+    .eye-dropper-icon::before {
+      background-image: var(--eye-dropper-icon);
+    }
+
+
+    b {
+      background: linear-gradient(0deg, var(--color) 2px, transparent 1px) no-repeat;
+    }
+
+    a {
+      color: var(--color);
+    }
+
+    code {
+      background-color: #ecf0f1;
+      border: 1px solid #bdc3c7;
+      border-radius: 3px;
+      padding: 0 2px;
+    }
+
+    @media (min-width: 1400px) {
+      nav {
+        font-size: 85%;
+      }
+    }
+
+    @media (max-width: 1000px) {
+      nav ul li a {
+        font-size: 0;
+        width: 24px;
+        height: 2.5rem;
+      }
+    }
+
+    html.framed {
+      background: #fff;
+    }
+
+    .framed body {
+      border-radius: 0;
+      background: #fff;
+      box-shadow: none;
+      scroll-behavior: smooth;
+      padding: 0;
+      margin: 0;
+      width: 100%;
+      min-width: auto;
+      border: 0;
+    }
+
+    .framed #playground {
+      width: 100%;
+      float: none;
+      margin: 0;
+      padding: 0.5em;
+      font-size: 14px;
+      box-sizing: border-box;
+      height: 100vh;
+    }
+    
+    .framed #playground h1::before {
+      content: "Framed ";
+    }
+
+    .framed header, 
+    .framed nav,
+    .framed body > article,
+    .framed aside footer {
+      display: none;
+    }
+
+    iframe {
+      border: 2px dashed #000;
+      width: 100%;
+      height: 200px;
+    }
+
+    /* playground examples */
+    #playground .absolute-all{
+      position: absolute;
+      top: .5em;
+      bottom: 10px;
+      left: 25%;
+      right: 5px;
+      background: red;
+      margin: 2px 4px 8px 16px;
+      padding: 5%;
+      border: 1px solid black;
+      color: #f2f2f2;
+      background: #b39bbf;
+      border: 1px solid #906ca2;
+    }
+
+    #playground .relative-all{
+      position: relative;
+      top: -5px;
+      left: 4px;
+      width: 6em;
+      margin: 2px 4px 8px 16px;
+      padding: 5%;
+      color: #f2f2f2;
+      background: #bb3658;
+      border: 1px solid #7e3661;
+    }
+
+    #playground #basic-transformations div {
+      width: 48px;
+      height: 48px;
+      border: 1px solid #00a388;
+      background: #beeb9f;
+    }
+
+    #playground .translate-rotate {
+      transform: translate(100px, 50px) rotate(20deg);
+      transform-origin: 0 -100px;
+    }
+
+    #playground .skew {
+      transform: skew(30deg, 20deg);
+      transform-origin: 0 -200px;
+      position: absolute;
+    }
+
+    #playground .scale {
+      transform: scale(0.5);
+    }
+
+    #playground #css-3d {
+      height: 200px;
+      perspective: 1500px;
+    }
+
+    #playground #css-3d .die {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transform: rotateX(-53deg);
+    }
+
+    #playground #css-3d .die .face {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      margin: 0 -50px;
+      border-left: 50px solid transparent;
+      border-right: 50px solid transparent;
+      border-bottom: 86px solid #968982c0;
+      width: 0px;
+      height: 0px;
+      transform-style: preserve-3d;
+      backface-visibility: hidden;
+      counter-increment: steps 1;
+    }
+
+    #playground #css-3d .die .face:before {
+      content: counter(steps);
+      position: absolute;
+      top: 21.5px;
+      left: -100px;
+      color: #fff;
+      font-size: 43px;
+      text-align: center;
+      line-height: 77.4px;
+      width: 200px;
+      height: 86px;
+    }
+
+    #playground #css-3d .die .face:nth-child(1) {
+       transform: rotateY(0deg) translateZ(33.5px) translateY(-12.9px) rotateX(53deg);
+    }
+    #playground #css-3d .die .face:nth-child(2) {
+      transform: rotateY(-72deg) translateZ(33.5px) translateY(-12.9px) rotateX(53deg);
+    }
+    #playground #css-3d .die .face:nth-child(3) {
+      transform: rotateY(-144deg) translateZ(33.5px) translateY(-12.9px) rotateX(53deg);
+    }
+    #playground #css-3d .die .face:nth-child(4) {
+      transform: rotateY(-216deg) translateZ(33.5px) translateY(-12.9px) rotateX(53deg);
+    }
+    #playground #css-3d .die .face:nth-child(5) {
+      transform: rotateY(-288deg) translateZ(33.5px) translateY(-12.9px) rotateX(53deg);
+    }
+    #playground #css-3d .die .face:nth-child(16) {
+      transform: rotateY(-108deg) translateZ(33.5px) translateY(121.26px) rotateZ(180deg) rotateX(53deg);
+    }
+    #playground #css-3d .die .face:nth-child(17) {
+      transform: rotateY(-36deg) translateZ(33.5px) translateY(121.26px) rotateZ(180deg) rotateX(53deg);
+    }
+    #playground #css-3d .die .face:nth-child(18) {
+      transform: rotateY(36deg) translateZ(33.5px) translateY(121.26px) rotateZ(180deg) rotateX(53deg);
+    }
+    #playground #css-3d .die .face:nth-child(19) {
+      transform: rotateY(108deg) translateZ(33.5px) translateY(121.26px) rotateZ(180deg) rotateX(53deg);
+    }
+    #playground #css-3d .die .face:nth-child(20) {
+      transform: rotateY(180deg) translateZ(33.5px) translateY(121.26px) rotateZ(180deg) rotateX(53deg);
+    }
+    #playground #css-3d .die .face:nth-child(6) {
+      transform: rotateY(360deg) translateZ(75px) translateY(54.18px) rotateZ(180deg) rotateX(-11deg);
+    }
+    #playground #css-3d .die .face:nth-child(7) {
+      transform: rotateY(288deg) translateZ(75px) translateY(54.18px) rotateZ(180deg) rotateX(-11deg);
+    }
+    #playground #css-3d .die .face:nth-child(8) {
+      transform: rotateY(216deg) translateZ(75px) translateY(54.18px) rotateZ(180deg) rotateX(-11deg);
+    }
+    #playground #css-3d .die .face:nth-child(9) {
+      transform: rotateY(144deg) translateZ(75px) translateY(54.18px) rotateZ(180deg) rotateX(-11deg);
+    }
+    #playground #css-3d .die .face:nth-child(10) {
+      transform: rotateY(72deg) translateZ(75px) translateY(54.18px) rotateZ(180deg) rotateX(-11deg);
+    }
+    #playground #css-3d .die .face:nth-child(11) {
+      transform: rotateY(252deg) translateZ(75px) translateY(54.18px) rotateX(-11deg);
+    }
+    #playground #css-3d .die .face:nth-child(12) {
+      transform: rotateY(324deg) translateZ(75px) translateY(54.18px) rotateX(-11deg);
+    }
+    #playground #css-3d .die .face:nth-child(13) {
+      transform: rotateY(396deg) translateZ(75px) translateY(54.18px) rotateX(-11deg);
+    }
+    #playground #css-3d .die .face:nth-child(14) {
+      transform: rotateY(468deg) translateZ(75px) translateY(54.18px) rotateX(-11deg);
+    }
+    #playground #css-3d .die .face:nth-child(15) {
+      transform: rotateY(540deg) translateZ(75px) translateY(54.18px) rotateX(-11deg);
+    }
+
+    #playground #grid .sidebar {
+      grid-area: sidebar;
+    }
+
+    #playground #grid .content {
+      grid-area: content;
+    }
+
+    #playground #grid .header {
+      grid-area: header;
+    }
+
+    #playground #grid .grid-wrapper {
+      display: grid;
+      grid-gap: 10px;
+      grid-template-columns: 40%  30%  20%;
+      grid-template-areas:
+                 "....... header  header"
+                 "sidebar content content";
+      color: #444;
+      padding: 1em;
+    }
+
+    #playground #grid .grid-box {
+      background-color: #444;
+      color: #fff;
+      border-radius: 5px;
+      padding: 1em;
+    }
+
+    #playground #grid .header {
+      background-color: #999;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Highlighters Test Page</h1>
+  </header>
+   
+  <nav>
+    <ul>
+      <li><a href="#box-model" title="Box Model">Box Model</a></li>
+      <li><a href="#css-grid" title="CSS Grid">CSS Grid</a></li>
+      <li><a href="#css-transform" title="CSS Transform">CSS Transform</a></li>
+      <li><a href="#selector" title="Selector">Selector</a></li>
+      <li><a href="#geometry-editor" title="Geometry Editor">Geometry Editor</a></li>
+      <li><a href="#rulers" title="Rulers">Rulers</a></li>
+      <li><a href="#measuring-tool" title="Measuring Tool">Measuring Tool</a></li>
+      <li><a href="#eye-dropper" title="Eye Dropper">Eye Dropper</a></li>
+    </ul>
+  </nav>
+
+
+  <aside id="playground">
+     <h1>Playground</h1>
+     <section id="basic-positioning">
+        <h4>Basic Positioning</a></h4>
+        <div class="absolute-all">
+          absolute
+          <div class="relative-all">
+            relative
+          </div>
+        </div>
+     </section>
+
+     <section id="basic-transformations">
+        <h4>Basic Transformations</h4>
+        <div class="translate-rotate"></div>
+        <div class="skew"></div>
+        <div class="scale"></div>
+     </section>
+
+     <section id="css-3d"> 
+      <h4>CSS 3D Transformations</h4>
+       <div class="die">
+         <figure class="face face-1"></figure>
+         <figure class="face face-2"></figure>
+         <figure class="face face-3"></figure>
+         <figure class="face face-4"></figure>
+         <figure class="face face-5"></figure>
+         <figure class="face face-6"></figure>
+         <figure class="face face-7"></figure>
+         <figure class="face face-8"></figure>
+         <figure class="face face-9"></figure>
+         <figure class="face face-10"></figure>
+         <figure class="face face-11"></figure>
+         <figure class="face face-12"></figure>
+         <figure class="face face-13"></figure>
+         <figure class="face face-14"></figure>
+         <figure class="face face-15"></figure>
+         <figure class="face face-16"></figure>
+         <figure class="face face-17"></figure>
+         <figure class="face face-18"></figure>
+         <figure class="face face-19"></figure>
+         <figure class="face face-20"></figure>
+       </div>
+     </section>
+
+     <section id="grid">
+       <h4>Grid</h4>
+       <div class="grid-wrapper">
+        <div class="grid-box header">Header</div>
+        <div class="grid-box sidebar">Sidebar</div>
+        <div class="grid-box content">Content</div>
+      </div>
+      </section>
+
+     <footer></footer>
+  </aside>
+
+  <article>
+    <section id="box-model">
+      <h2>Box Model Highlighter</h2>
+      <p>
+        This highlighter is the most used highlighter because it is used in
+        <b>elements' inspection.</b>.
+      </p>
+      <h3>How to activate it</h3>
+      <p>
+        It can be shown just by inspecting elements in the page: <b>right click</b>
+        with the mouse on an element in the page, from the <b>context menu</b>
+        choose <b>inspect element</b>. The box around the element and the
+        dashed guidelines, are the box model highlighter itself.
+      </p>
+      <p>
+        Once the toolbox is open, <b>moving the mouse over DOM nodes in the 
+        inspector</b> will also display the box model highlighter on that
+        element.
+      </p>
+      <h3>Where to test</h3>
+      <ul>
+        <li>Any page, this too.</li>
+      </ul> 
+    </section>
+
+    <section id="css-grid">
+      <h2>CSS Grid Highlighter</h2>
+      <p>
+         This highlighter is used to overlays a visual grid on top of 
+         <code>display:grid</code> elements.
+      </p>
+      <h3>How to activate it</h3>
+      <p>
+        Inspect an element in the page that has <code>display: grid</code>.
+        Then, from the Rules' view panel, click on the <b class="css-grid-icon">grid</b>'s icon between
+        <code>display</code>'s property name and <code>grid</code>'s value.
+      </p>
+      <p>
+        A visual grid should be visible now, that represent the grid structure
+        of the inspected element.
+      </p>
+      <h3>Where to test</h3>
+      <ul>
+        <li>Playground area on the left, <b>Grid section</b></li>
+        <li><a href="http://gridbyexample.com/examples/" target="grid-by-example">Grid by Example</a></li>
+        <li><a href="http://labs.jensimmons.com/examples/grid-content-1.html" target="jazz-poster">Jazz Poster | Jen Simmons</a></li>
+      </ul>
+    </section>
+
+    <section id="css-transform">
+      <h2>CSS Transform Highlighter</h2>
+      <p>
+        This highlighter draws an outline around a transformed element and an
+        outline around where it would be if untransformed as well as arrows
+        connecting the 2 outlines' corners.
+      </p>
+      <h3>How to activate it</h3>
+      <p>
+        Inspect an element in the page that has <code>transform</code> property
+        set.
+        Then, from the Rules' view panel, hover the <code>transform</code>'s 
+        value.
+      </p>
+      <p>
+        An overylay that shown the original element without transformation
+        should be now visible on the page; that is the CSS Transform
+        highlighter.
+      </p>
+      <h3>Where to test</h3>
+      <ul>
+        <li>Playground area on the left, <b>Basic transformations</b> and 
+          <b>CSS 3D  transformations</b> section
+        </li>
+      </ul>
+    </section>
+
+    <section id="selector">
+      <h2>Selector Highlighter</h2>
+      <p>
+        This highlighter runs a given selector through
+        <code>querySelectorAll</code> on the document of the provided context
+        node and then uses the  <a class="box-model-icon" href="#box-model">Box Model highlighter</a>
+        to highlight the matching nodes.
+      </p>
+      <h3>How to activate it</h3>
+      <p>
+        Open the devtools (<i>Tools > Web Developer > Toggle Tools</i>) then
+        from the <b>rules' view</b> click on the <b class="selector-icon">inspector's icon</b> (the one 
+        after a CSS rule, with tooltip <i>"Highlight all elements matching this
+        selector"</i>).
+      </p>
+      <h3>Where to test</h3>
+      <ul>
+        <li>Any page, this too.</li>
+      </ul>
+    </section>
+
+    <section id="geometry-editor">
+      <h2>Geometry Editor Highlighter</h2>
+
+      <p>
+        This highlighter allows you to change via drag &amp; drop an element's
+        <code>top</code>, <code>left</code>, <code>bottom</code>, 
+        <code>right</code>, <code>width</code> and <code>height</code> 
+        dimensions, when they are set.
+      </p>
+      <p>
+        The highlighter displays lines and labels for each of the defined
+        properties in and around the element (relative to the offset parent
+         when one exists).
+      <p>
+        The highlighter won't be shown if the element doesn't have any of these
+        properties set, but will be shown when at least one property is defined.
+      </p>
+      <h3>How to activate it</h3>
+      <p>
+        Inspect an element in the page that has <code>position</code> property
+        set to <code>relative</code>, <code>absolute</code> or
+        <code>fixed</code>; and at least one of the dimensions listed above.
+        Then, in the <b>Computed</b>'s panel, under <b>Box Model</b>, click the
+        <b class="geometry-editor-icon">layout's icon</b> displayed close to the
+        position's value.
+      </p>
+      <h3>Where to test</h3>
+      <ul>
+        <li>Playground area on the left, <b>Basic Positioning</b> section.</li>
+        <li>
+          <a href="http://bgrins.github.io/devtools-demos/inspector/positions.html" 
+             target="devtools-demo-position">DevTools Demos - Positioning playground
+          </a>
+        </li>
+      </ul>
+    </section>
+
+    <section id="rulers">
+      <h2>Rulers Highlighter</h2>
+      <p>
+        The Rulers highlighter displays both horizontal and vertical rules on
+        the page, along the top and left edges, with pixel graduations, useful
+        for users to quickly check distances.
+      </p>
+      <h3>How to activate it</h3>
+      <p>
+        Open the devtools (<i>Tools > Web Developer > Toggle Tools</i>) then
+        you should see the <b class="rulers-icon">rulers icon</b> in the 
+        toolbox's buttons area. Clicking the icon, will toggle the rulers.
+      </p>
+      <p>
+        If it's not visible, click on the <b>Settings</b> (the gear icon), and
+        check <b>Toggle rulers for the page</b> under 
+        <b>Available Toolbox buttons</b>.
+      </p>
+      <h3>Where to test</h3>
+      <ul>
+        <li>Any page, this too.</li>
+      </ul> 
+    </section>
+
+    <section id="measuring-tool">
+      <h2>Measuring Tool Highlighter</h2>
+      <p>
+        The Measuring Tool highlighter is used to measure distances in a page.
+        It allows users to click and drag with their mouse to draw an area whose
+        dimensions will be displayed in a tooltip next to it.
+        This allows users to measure distances between elements on a page.
+      </p>
+      <h3>How to activate it</h3>
+      <p>
+        Open the devtools (<i>Tools > Web Developer > Toggle Tools</i>) then
+        you should see the
+        <b class="measuring-tool-icon">measuring tool icon</b> in the 
+        toolbox's buttons area. Clicking the icon, will toggle the tool.
+      </p>
+      <p>
+        If it's not visible, click on the <b>Settings</b> (the gear icon), and
+        check <b>Measure a portion of the page</b> under 
+        <b>Available Toolbox buttons</b>.
+      </p>
+      <p>
+        Once the highlighter is active, hovering the mouse in the document
+        should display a tooltip with the current coordinates.
+        It is now possible to measure a portion of the page by keeping the 
+        mouse button pressed and releasing once the interesting area is covered.
+      </p>
+      <h3>Where to test</h3>
+      <ul>
+        <li>Any page, this too.</li>
+      </ul> 
+    </section>
+
+    <section id="eye-dropper">
+      <h2>Eye Dropper</h2>
+      <p>
+        The Eye Dropper highlighter displays a magnifier that tracks mouse 
+        moves and shows a magnified version of the page. On click, it samples
+        the color at the pixel being hovered.
+      </p>
+       
+      <h3>How to activate it</h3>
+      <p>
+        Open the devtools (<i>Tools > Web Developer > Toggle Tools</i>) then
+        click on the <b class="eye-dropper-icon">eye dropper icon</b>, close to
+        the <b>search box</b>.
+      </p>
+      <h3>Where to test</h3>
+      <ul>
+        <li>Any page, this too.</li>
+      </ul> 
+    </section>
+  </article>
+
+  <script>
+    if (window === window.top) {
+      function updateIcon(hash) {
+        let url =  window
+                    .getComputedStyle(document.documentElement)
+                    .getPropertyValue(`--${hash.substr(1)}-icon`)
+        url = url.substring(5, url.length - 1);
+
+        document.querySelector("link[rel='shortcut icon']").href = url;
+      }
+
+      document.querySelector("aside")
+        .appendChild(document.createElement("iframe"))
+        .contentWindow.location = window.location;
+
+      
+      window.addEventListener("hashchange", () => {
+        updateIcon(window.location.hash);
+      });
+
+      updateIcon("#box-model");
+    } else {
+      document.documentElement.className = "framed";
+    }
+  </script>
+</body>
+</html>
