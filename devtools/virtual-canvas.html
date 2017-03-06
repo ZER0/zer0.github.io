@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset=utf-8 />
+  <meta name="author" content="Matteo Ferretti" />
+  <link rel="author" href="https://twitter.com/zer0" />
+  <link rel="shortcut icon" type="image/svg+xml" />
+  
+  <title></title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", sans-serif;
+      color: #283037;
+      font-size: 16px;
+      line-height: 1.5em;
+      scroll-behavior: smooth;
+      width: 40000px;
+      height: 40000px;
+    }
+
+    #a {
+      position: absolute;
+      width: 320px;
+      height: 240px;
+      top: 400px;
+      left: 600px;
+      background: #b39bbf;
+      border: 1px solid #906ca2;
+    }
+
+    #b {
+      position: absolute;
+      width: 160px;
+      height: 120px;
+      top: 20000px;
+      left: 3000px;
+      background: #bb3658;
+      border: 1px solid #7e3661;
+    }
+
+    #c {
+      position: absolute;
+      width: 640px;
+      height: 480px;
+      top: 33000px;
+      left: 30px;
+      background: #beeb9f;
+      border: 1px solid #00a388;
+    }
+
+    canvas {
+      position: absolute;
+      z-index: 9999;
+      opacity: 0.85;
+    }
+
+    main {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 40000px;
+      height: 40000px;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body> 
+  <main></main>
+
+  <div id="a"></div>
+  <div id="b"></div> 
+  <div id="c"></div> 
+
+  <script>
+    function getMaxSurfaceSize() {
+      let canvas = window.document.createElement("canvas");
+      let gl = canvas.getContext("webgl");
+      return gl.getParameter(gl.MAX_TEXTURE_SIZE);
+    }
+
+    const MAX_SIZE = getMaxSurfaceSize();
+    const CSS_MAX_SIZE = MAX_SIZE / devicePixelRatio;
+    let canvas = document.querySelector("main")
+                  .appendChild(document.createElement("canvas"));
+
+    canvas.height = canvas.width = MAX_SIZE;
+    canvas.style.width = canvas.style.height = CSS_MAX_SIZE + "px";
+    canvas.style.border="1px solid red";
+    canvas.style.borderLeft = "1px solid blue";
+  
+    let context = canvas.getContext("2d");
+    context.fillStyle = "silver";
+    context.fillRect(0, 0, MAX_SIZE, MAX_SIZE);
+    let x = 0;
+    let y = 0;
+
+    canvas.style.left = x + "px";
+    canvas.style.top = y + "px";
+
+    requestAnimationFrame(function paint() {
+      let viewportWidth = window.innerWidth;
+      let viewportHeight = window.innerHeight;
+      let documentWidth = document.scrollingElement.scrollWidth;
+      let documentHeight = document.scrollingElement.scrollHeight;
+      let bufferSizeX = (CSS_MAX_SIZE - viewportWidth) / 2;
+      let bufferSizeY = (CSS_MAX_SIZE - viewportHeight) / 2;
+      let hasUpdated = false;
+
+      if (y < (documentHeight - CSS_MAX_SIZE) && window.pageYOffset - y > bufferSizeY) {
+        y = Math.min(window.pageYOffset - (bufferSizeY / 2), documentHeight - CSS_MAX_SIZE);
+        hasUpdated = true;
+      } else if (y > 0 && window.pageYOffset - y < bufferSizeY / 2) {
+        hasUpdated = true;
+        y = Math.max(window.pageYOffset - (bufferSizeY), 0);
+      }
+
+      if (x < (documentWidth - CSS_MAX_SIZE) && window.pageXOffset - x > bufferSizeX) {
+        x = Math.min(window.pageXOffset - (bufferSizeX / 2), documentWidth - CSS_MAX_SIZE);
+        hasUpdated = true;
+      } else if (x > 0 && pageXOffset - x < bufferSizeX / 2) {
+        x = Math.max(pageXOffset - (bufferSizeX), 0);
+        hasUpdated = true;
+      }
+
+      if (hasUpdated) {
+        console.log(x, y);
+        canvas.style.transform = `translate3d(${x}px, ${y}px, .1px)`;
+        context.fillStyle = "silver";
+        context.fillRect(0, 0, MAX_SIZE, MAX_SIZE);
+
+        drawGuideLines();
+
+      }
+
+      drawGuideLines();
+
+      requestAnimationFrame(paint);
+    });
+
+    let rects = [
+      document.getElementById("a"),
+      document.getElementById("b"),
+      document.getElementById("c")
+    ].reduce((result, node, i) => {
+      let rect = node.getBoundingClientRect();
+      let color = window.getComputedStyle(node).borderTopColor;
+
+      result.push({
+        top: rect.top + window.pageYOffset,
+        right: rect.right + window.pageXOffset,
+        bottom: rect.bottom + window.pageYOffset,
+        left: rect.left + window.pageXOffset,
+        color,
+      });
+      
+      return result;
+    }, [])
+
+    let drawOffset = 1 / window.devicePixelRatio / 2;
+
+    function drawGuideLines() {
+      context.setLineDash([5, 8]);
+
+      for (let rect of rects) {
+        context.beginPath();
+        context.moveTo(0 ,Math.round(rect.top - 1 - y) * devicePixelRatio + drawOffset);
+        context.lineTo(MAX_SIZE, Math.round(rect.top - 1 - y) * devicePixelRatio + drawOffset);
+        context.moveTo(0 ,Math.round(rect.bottom - 2 - y) * devicePixelRatio + drawOffset);
+        context.lineTo(MAX_SIZE, Math.round(rect.bottom - 2 - y) * devicePixelRatio + drawOffset);
+
+        context.moveTo(Math.round(rect.left - 1 - x) * devicePixelRatio + drawOffset, 0);
+        context.lineTo(Math.round(rect.left - 1 - x) * devicePixelRatio + drawOffset, MAX_SIZE);
+        context.moveTo(Math.round(rect.right - 2 - x) * devicePixelRatio + drawOffset, 0);
+        context.lineTo(Math.round(rect.right - 2 - x) * devicePixelRatio + drawOffset, MAX_SIZE);
+        context.strokeStyle = rect.color;
+        context.stroke();
+      }
+    }
+
+  </script>
+</body>
+</html>
