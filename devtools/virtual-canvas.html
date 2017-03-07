@@ -58,7 +58,6 @@
     canvas {
       position: absolute;
       z-index: 9999;
-      opacity: 0.85;
     }
 
     main {
@@ -126,8 +125,6 @@
     canvas.style.borderLeft = "1px solid blue";
 
     let context = canvas.getContext("2d");
-    context.fillStyle = "silver";
-    context.fillRect(0, 0, maxSize, maxSize);
     let x = 0;
     let y = 0;
 
@@ -139,46 +136,40 @@
       let viewportHeight = window.innerHeight;
       let documentWidth = document.scrollingElement.scrollWidth;
       let documentHeight = document.scrollingElement.scrollHeight;
-      let bufferSizeX = (CSS_MAX_SIZE - viewportWidth) / 2;
-      let bufferSizeY = (CSS_MAX_SIZE - viewportHeight) / 2;
+      let bufferSizeX = (CSS_MAX_SIZE - viewportWidth) >> 2;
+      let bufferSizeY = (CSS_MAX_SIZE - viewportHeight) >> 2;
+      let pageX = window.pageXOffset;
+      let pageY = window.pageYOffset;
+      let canvasWidth = CSS_MAX_SIZE;
+      let canvasHeight = CSS_MAX_SIZE;
       let hasUpdated = false;
 
-      if (y < (documentHeight - CSS_MAX_SIZE) && window.pageYOffset - y > bufferSizeY) {
-        y = Math.min(window.pageYOffset - (bufferSizeY / 2), documentHeight - CSS_MAX_SIZE);
+      if (y < documentHeight - canvasHeight && pageY + viewportHeight > y + canvasHeight - bufferSizeY) {
+        y = Math.min(pageY - bufferSizeY, documentHeight - canvasHeight);
         hasUpdated = true;
-      } else if (y > 0 && window.pageYOffset - y < bufferSizeY / 2) {
+      } else if (y > 0 && pageY - y < bufferSizeY) {
+        y = Math.max(pageY - canvasHeight + viewportHeight + bufferSizeY, 0);
         hasUpdated = true;
-        y = Math.max(window.pageYOffset - (bufferSizeY), 0);
       }
 
-      if (x < (documentWidth - CSS_MAX_SIZE) && window.pageXOffset - x > bufferSizeX) {
-        x = Math.min(window.pageXOffset - (bufferSizeX / 2), documentWidth - CSS_MAX_SIZE);
+      if (x < documentWidth - canvasWidth && pageX + viewportWidth > x + canvasWidth - bufferSizeX) {
+        x = Math.min(pageX - bufferSizeX, documentWidth - canvasWidth);
         hasUpdated = true;
-      } else if (x > 0 && pageXOffset - x < bufferSizeX / 2) {
-        x = Math.max(pageXOffset - (bufferSizeX), 0);
+      } else if (x > 0 && pageX - x < bufferSizeX) {
+        x = Math.max(pageX - canvasWidth + viewportWidth + bufferSizeX, 0);
         hasUpdated = true;
       }
 
       if (hasUpdated) {
-        console.log(x, y);
         canvas.style.transform = `translate3d(${x}px, ${y}px, .1px)`;
-        context.fillStyle = "silver";
-        context.fillRect(0, 0, maxSize, maxSize);
-
         drawGuideLines();
-
       }
-
-      drawGuideLines();
 
       requestAnimationFrame(paint);
     });
 
-    let rects = [
-      document.getElementById("a"),
-      document.getElementById("b"),
-      document.getElementById("c")
-    ].reduce((result, node, i) => {
+    let rects = ["a", "b", "c"].reduce((result, id, i) => {
+      let node = document.getElementById(id);
       let rect = node.getBoundingClientRect();
       let color = window.getComputedStyle(node).borderTopColor;
 
@@ -196,6 +187,7 @@
     let drawOffset = 1 / window.devicePixelRatio / 2;
 
     function drawGuideLines() {
+      context.clearRect(0, 0, maxSize, maxSize);
       context.setLineDash([5, 8]);
 
       for (let rect of rects) {
@@ -214,6 +206,7 @@
       }
     }
 
+    drawGuideLines();
   </script>
 </body>
 </html>
