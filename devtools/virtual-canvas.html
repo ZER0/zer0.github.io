@@ -16,9 +16,9 @@
     }
 
     body {
-      font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", sans-serif;
+      font-family: monospace;
       color: #283037;
-      font-size: 16px;
+      font-size: 14px;
       line-height: 1.5em;
       scroll-behavior: smooth;
       width: 40000px;
@@ -68,9 +68,18 @@
       height: 40000px;
       overflow: hidden;
     }
+
+    output {
+      position: fixed;
+      top: 0;
+      left: 0;
+      margin: 0.5em;
+      white-space: pre-line;
+    }
   </style>
 </head>
 <body>
+  <output></output>
   <main></main>
 
   <div id="a"></div>
@@ -89,7 +98,7 @@
     // The maximum allocable pixels the canvas can have
     const MAX_ALLOC_PIXELS = MAX_ALLOC_SIZE / BYTES_PER_PIXEL;
     // The maximum allocable pixels per side in a square canvas
-    const MAX_ALLOC_PIXELS_PER_SIDE = Math.sqrt(MAX_ALLOC_PIXELS);
+    const MAX_ALLOC_PIXELS_PER_SIDE = Math.sqrt(MAX_ALLOC_PIXELS) |0;
 
     function getMaxSurfaceSize() {
       let canvas = window.document.createElement("canvas");
@@ -102,25 +111,38 @@
       return gl.getParameter(gl.MAX_TEXTURE_SIZE);
     }
 
+    const MAX_TEXTURE_SIZE = getMaxSurfaceSize();
+
     function getMaxSizeFromURL() {
       return +window.location.search.substr(1) || 0
     }
 
-    let maxSize = getMaxSizeFromURL() || getMaxSurfaceSize();
+    let maxSize = getMaxSizeFromURL() || MAX_TEXTURE_SIZE;
+
+    const output = document.querySelector("output");
+    function updateDebugInfo() {
+      output.textContent =
+        `MAX_ALLOC_SIZE: ${MAX_ALLOC_SIZE} bytes
+         MAX_ALLOC_PIXELS_PER_SIDE: ${MAX_ALLOC_PIXELS_PER_SIDE}px
+
+         MAX_TEXTURE_SIZE: ${MAX_TEXTURE_SIZE}
+         max canvas size: ${maxSize}x${maxSize} (physical pixels)
+         devicePixelRatio: ${devicePixelRatio}`;
+    }
 
     // We have to consider also the memory allocation limit.
     // For example, a 16384x16384 canvas will exceeds the current MAX_ALLOC_PIXELS, as
     // well as 8192x8192 on retina (2dppx).
     if (maxSize * devicePixelRatio > MAX_ALLOC_PIXELS_PER_SIDE) {
-      maxSize = MAX_ALLOC_PIXELS_PER_SIDE;
+      maxSize = Math.min(MAX_TEXTURE_SIZE, MAX_ALLOC_PIXELS_PER_SIDE);
     }
 
-    const CSS_MAX_SIZE = maxSize / devicePixelRatio;
+    let cssMaxSize = maxSize / devicePixelRatio;
     let canvas = document.querySelector("main")
                   .appendChild(document.createElement("canvas"));
 
     canvas.height = canvas.width = maxSize;
-    canvas.style.width = canvas.style.height = CSS_MAX_SIZE + "px";
+    canvas.style.width = canvas.style.height = cssMaxSize + "px";
     canvas.style.border="1px solid red";
     canvas.style.borderLeft = "1px solid blue";
 
@@ -131,18 +153,40 @@
     canvas.style.left = x + "px";
     canvas.style.top = y + "px";
 
+    let drawOffset = 1 / devicePixelRatio / 2;
+
+    let lastVW = 0;
+    let lastVH = 0;
+    let lastDPR = 0;
+
+    function resizeCanvas() {
+      cssMaxSize = maxSize / devicePixelRatio;
+      canvas.style.width = canvas.style.height = cssMaxSize + "px";
+      drawOffset = 1 / devicePixelRatio / 2;
+      updateDebugInfo();
+    }
+
+
     requestAnimationFrame(function paint() {
       let viewportWidth = window.innerWidth;
       let viewportHeight = window.innerHeight;
       let documentWidth = document.scrollingElement.scrollWidth;
       let documentHeight = document.scrollingElement.scrollHeight;
-      let bufferSizeX = (CSS_MAX_SIZE - viewportWidth) >> 2;
-      let bufferSizeY = (CSS_MAX_SIZE - viewportHeight) >> 2;
+      let bufferSizeX = (cssMaxSize - viewportWidth) >> 2;
+      let bufferSizeY = (cssMaxSize - viewportHeight) >> 2;
       let pageX = window.pageXOffset;
       let pageY = window.pageYOffset;
-      let canvasWidth = CSS_MAX_SIZE;
-      let canvasHeight = CSS_MAX_SIZE;
+      let canvasWidth = cssMaxSize;
+      let canvasHeight = cssMaxSize;
       let hasUpdated = false;
+
+      if (lastVW !== viewportWidth || lastVH !== viewportHeight || lastDPR !== devicePixelRatio) {
+        lastVW = viewportWidth;
+        lastVH = viewportHeight;
+        lastDPR = devicePixelRatio;
+        resizeCanvas();
+        hasUpdated = true;
+      }
 
       if (y < documentHeight - canvasHeight && pageY + viewportHeight > y + canvasHeight - bufferSizeY) {
         y = Math.min(pageY - bufferSizeY, documentHeight - canvasHeight);
@@ -184,23 +228,21 @@
       return result;
     }, [])
 
-    let drawOffset = 1 / window.devicePixelRatio / 2;
-
     function drawGuideLines() {
       context.clearRect(0, 0, maxSize, maxSize);
       context.setLineDash([5, 8]);
 
       for (let rect of rects) {
         context.beginPath();
-        context.moveTo(0 ,Math.round(rect.top - 1 - y) * devicePixelRatio + drawOffset);
-        context.lineTo(maxSize, Math.round(rect.top - 1 - y) * devicePixelRatio + drawOffset);
-        context.moveTo(0 ,Math.round(rect.bottom - 2 - y) * devicePixelRatio + drawOffset);
-        context.lineTo(maxSize, Math.round(rect.bottom - 2 - y) * devicePixelRatio + drawOffset);
+        context.moveTo(0 ,Math.round((rect.top - 1 - y) * devicePixelRatio) + drawOffset);
+        context.lineTo(maxSize, Math.round((rect.top - 1 - y) * devicePixelRatio) + drawOffset);
+        context.moveTo(0 ,Math.round((rect.bottom - 2 - y) * devicePixelRatio) + drawOffset);
+        context.lineTo(maxSize, Math.round((rect.bottom - 2 - y) * devicePixelRatio) + drawOffset);
 
-        context.moveTo(Math.round(rect.left - 1 - x) * devicePixelRatio + drawOffset, 0);
-        context.lineTo(Math.round(rect.left - 1 - x) * devicePixelRatio + drawOffset, maxSize);
-        context.moveTo(Math.round(rect.right - 2 - x) * devicePixelRatio + drawOffset, 0);
-        context.lineTo(Math.round(rect.right - 2 - x) * devicePixelRatio + drawOffset, maxSize);
+        context.moveTo(Math.round((rect.left - 1 - x) * devicePixelRatio) + drawOffset, 0);
+        context.lineTo(Math.round((rect.left - 1 - x) * devicePixelRatio) + drawOffset, maxSize);
+        context.moveTo(Math.round((rect.right - 2 - x) * devicePixelRatio) + drawOffset, 0);
+        context.lineTo(Math.round((rect.right - 2 - x) * devicePixelRatio) + drawOffset, maxSize);
         context.strokeStyle = rect.color;
         context.stroke();
       }
