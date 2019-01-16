@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset=utf-8 />
+  <meta name="author" content="Matteo Ferretti" />
+  <link rel="author" href="https://twitter.com/zer0" />
+
+  <title>Infobar</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      width: 40000px;
+      height: 40000px;
+    }
+
+    :root {
+      --infobar-height: 40px;
+    }
+
+    body {
+      font-family: "monospace";
+      font-size: 16px;
+      line-height: 1.5em;
+      scroll-behavior: smooth;
+    }
+
+    #container {
+      position: absolute;
+      border: 1px dotted #b39bbf;
+      height: var(--infobar-height);
+      box-sizing: border-box;
+      z-index: 999;
+      transform: translate(-50%)
+    }
+
+    #infobar {
+      position: relative;
+      background: #bb3658;
+      border: 1px solid #7e3661;
+      min-width: 70px;
+      height: var(--infobar-height);
+
+      box-sizing: border-box;
+      opacity: 0.5;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .box {
+      position: absolute;
+      background: #beeb9f;
+      border: 1px solid #00a388;
+    }
+  </style>
+</head>
+<body>
+    <div id="container">
+      <div id="infobar">Hello</div>
+  </div>
+  <script>
+    const HEIGHT = 40;
+    function getRandomInt(min, max) {
+      min = Math.ceil(min);
+      max = Math.floor(max);
+      return Math.floor(Math.random() * (max - min)) + min;
+    }
+
+    (function generateNodes(num) {
+      for (let i = 0; i < num; i++) {
+        let div = document.body.appendChild(document.createElement("div"));
+        div.id = "box-" + i;
+        div.className = "box";
+        div.style.left = getRandomInt(0, 9000) + "px";
+        div.style.top = getRandomInt(0, 9000) + "px";
+        div.style.width = getRandomInt(50, 500) + "px";
+        div.style.height = getRandomInt(50, 500) + "px";
+        div.addEventListener("click", showHere);
+      }
+    })(100)
+
+
+    let container = document.getElementById("container");
+    let infobar = document.getElementById("infobar");
+
+    let rect;
+/*
+    document.addEventListener("click", (event) => {
+      clickedX = event.layerX
+      clickedY = event.layerY;
+    });
+*/
+    function showHere(event) {
+      let noderect = this.getBoundingClientRect();
+
+      rect = {
+        x: noderect.x + (noderect.width >> 1) + pageXOffset,
+        y: noderect.y + pageYOffset,
+        bottom: noderect.bottom + pageYOffset
+      }
+    }
+
+    requestAnimationFrame(function render(){
+/*
+      if (clickedY < window.pageYOffset) {
+        //container.style.position = "fixed";
+        //isFixed = true;
+        top = 0;
+      } else if (clickedY > window.innerHeight + window.pageYOffset - 40) {
+        //container.style.position = "fixed";
+        //isFixed = true;
+        bottom = 0;
+      } else {
+        container.style.position = "";
+        top = clickedY;
+      }
+
+      let = left = isFixed ? clickedX : clickedX;
+      if (typeof top === "number") {
+        container.style.top = top + "px";
+        container.style.bottom = "";
+      } else if (typeof bottom === "number") {
+        container.style.top = "";
+        container.style.bottom = bottom + "px";
+      }
+      container.style.left = left + "px";
+
+      //infobar.style.left = clickedX + "px";
+*/
+      if (rect) {
+        let top = rect.y - HEIGHT;
+        let bottom = rect.bottom;
+        let left = rect.x;
+        let isFixed = false;
+
+        let topGap = top - pageYOffset
+        let bottomGap = (window.innerHeight + pageYOffset) - rect.bottom - HEIGHT;
+
+        let containerHalfWidth = parseFloat(getComputedStyle(container).width) / 2;
+
+        container.style.position = "absolute";
+        infobar.style.left = "";
+
+        if (top < pageYOffset) {
+          if (bottomGap > 0) {
+            top = rect.bottom;
+          }
+        }
+
+        if (top < pageYOffset) {
+          top = 0;
+          container.style.position = "fixed";
+          isFixed = true;
+        } else if (top > window.innerHeight + pageYOffset) {
+          top = window.innerHeight - HEIGHT;
+          container.style.position = "fixed";
+          isFixed = true;
+        }
+
+        console.log(containerHalfWidth);
+
+        if (!isFixed) {
+          if (left - containerHalfWidth < pageXOffset) {
+            isFixed = true;
+            container.style.position = "fixed";
+            top -= pageYOffset;
+          } else if (left - pageXOffset > window.innerWidth - containerHalfWidth) {
+            isFixed = true;
+            container.style.position = "fixed";
+            top -= pageYOffset;
+          }
+        }
+
+        container.style.top = top + "px"
+
+        if (isFixed) {
+          left = Math.min(Math.max(containerHalfWidth, left - pageXOffset), window.innerWidth - containerHalfWidth);
+        }
+        container.style.left = left + "px";
+      }
+
+      requestAnimationFrame(render);
+    });
+  </script>
+</body>
+</html>

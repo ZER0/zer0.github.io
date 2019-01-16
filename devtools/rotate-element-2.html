@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset=utf-8 />
+  <meta name="author" content="Matteo Ferretti" />
+  <link rel="author" href="https://twitter.com/zer0" />
+  <link rel="shortcut icon" type="image/svg+xml" />
+
+  <title></title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      font-family: monospace;
+      color: #283037;
+      font-size: 14px;
+      line-height: 1.5em;
+      scroll-behavior: smooth;
+    }
+
+    #a {
+      position: absolute;
+      width: 160px;
+      height: 120px;
+      top: 120px;
+      left: 130px;
+      background: #beeb9f;
+      border: 1px solid #00a388;
+    }
+/*
+    #b {
+      position: absolute;
+      width: 160px;
+      height: 120px;
+      top: 20000px;
+      left: 3000px;
+      background: #bb3658;
+      border: 1px solid #7e3661;
+    }
+
+    #c {
+      position: absolute;
+      width: 640px;
+      height: 480px;
+      top: 33000px;
+      left: 30px;
+      background: #beeb9f;
+      border: 1px solid #00a388;
+      background: #b39bbf;
+      border: 1px solid #906ca2;
+    }
+*/
+    canvas {
+      position: absolute;
+      z-index: 9999;
+      top: 0px;
+      left: 0px;
+    }
+
+    main {
+    }
+
+    output {
+      position: fixed;
+      top: 0;
+      left: 0;
+      margin: 0.5em;
+      white-space: pre-line;
+    }
+  </style>
+</head>
+<body>
+  <output></output>
+  <main></main>
+
+  <div id="a"></div>
+  <script>
+    const identity = [
+      1, 0, 0,
+      0, 1, 0,
+    ];
+
+    const scale = (sx = 1, sy = sx) => [
+      sx,  0, 0,
+       0, sy, 0,
+       0,  0, 1
+    ];
+
+    const translate = (tx = 0, ty = tx) => [
+      1, 0, tx,
+      0, 1, ty,
+      0, 0,  1
+    ];
+
+    const multiply = (A, B) => {
+      let c11 = A[0] * B[0] + A[1] * B[3] + A[2] * B[6];
+      let c12 = A[0] * B[1] + A[1] * B[4] + A[2] * B[7];
+      let c13 = A[0] * B[2] + A[1] * B[5] + A[2] * B[8];
+
+      let c21 = A[3] * B[0] + A[4] * B[3] + A[5] * B[6];
+      let c22 = A[3] * B[1] + A[4] * B[4] + A[5] * B[7];
+      let c23 = A[3] * B[2] + A[4] * B[5] + A[5] * B[8];
+
+      let c31 = A[6] * B[0] + A[7] * B[3] + A[8] * B[6];
+      let c32 = A[6] * B[1] + A[7] * B[4] + A[8] * B[7];
+      let c33 = A[6] * B[2] + A[7] * B[5] + A[8] * B[8];
+
+      return [
+        c11, c12, c13,
+        c21, c22, c23,
+        c31, c32, c33
+      ];
+    }
+
+    const apply = (A, B) => {
+      let c11 = A[0] * B[0] + A[1] * B[1] + A[2] * B[2];
+
+      let c21 = A[3] * B[0] + A[4] * B[1] + A[5] * B[2];
+
+      let c31 = A[6] * B[0] + A[1] * B[1] + A[8] * B[2];
+
+      return [
+        c11,
+        c21,
+        c31
+      ]
+    }
+
+    function getNodeMatrix(node) {
+      let t = getComputedStyle(node).transform;
+
+      if (t === "none") {
+        return null;
+      }
+
+      let m = t.substring(t.indexOf("(") + 1, t.length - 1).split(/,\s*/).map(Number);
+
+      return m;
+      return [
+        m[0], m[2], m[4],
+        m[1], m[3], m[5],
+           0,    0,    1
+      ]
+    }
+
+    let mtrx = scale(devicePixelRatio);
+  </script>
+  <script>
+    let maxSize = 800;
+    let cssMaxSize = maxSize / devicePixelRatio;
+    let canvas = document.querySelector("main")
+                  .appendChild(document.createElement("canvas"));
+
+    canvas.height = canvas.width = maxSize;
+    canvas.style.width = canvas.style.height = cssMaxSize + "px";
+
+    let context = canvas.getContext("2d");
+
+    let drawOffset = 1 / devicePixelRatio / 2;
+
+    let quad = document.getElementById("a").getBoxQuads()[0];
+
+    drawQuad(quad);
+
+    function drawQuad(quad) {
+      context.beginPath();
+
+      drawLine(quad.p1, quad.p2);
+      drawLine(quad.p2, quad.p3);
+      drawLine(quad.p3, quad.p4);
+      drawLine(quad.p4, quad.p1);
+
+      context.strokeStyle = "#906ca2";
+      context.stroke();
+    }
+
+    function drawLine(from, to) {
+      let p1 = apply(mtrx, [from.x, from.y, 1]);
+      let p2 = apply(mtrx, [to.x, to.y, 1]);
+      context.moveTo(p1[0], p1[1]);
+      context.lineTo(p2[0], p2[1]);
+    }
+
+    requestAnimationFrame(function render() {
+      context.clearRect(0, 0, maxSize, maxSize);
+      let origin = getComputedStyle(a).transformOrigin.split(/ /).map(parseFloat);
+
+      mtrx = identity;
+      /*
+      mtrx = multiply(mtrx, scale(devicePixelRatio));
+      mtrx = multiply(mtrx, translate(quad.bounds.left + origin[0], quad.bounds.top + origin[1]));
+      mtrx = multiply(mtrx, getNodeMatrix(a));
+      mtrx = multiply(mtrx, translate(-quad.bounds.left - origin[0], -quad.bounds.top - origin[1]));
+      */
+      context.save();
+      let m = getNodeMatrix(a);
+      if (m) {
+        context.translate(quad.bounds.left + origin[0], quad.bounds.top + origin[1]);
+        context.transform(...m);
+        context.translate(-quad.bounds.left - origin[0], -quad.bounds.top - origin[1]);
+      }
+
+      drawQuad(quad);
+      context.restore();
+      requestAnimationFrame(render);
+    })
+
+/*
+    function drawGuideLines() {
+      context.clearRect(0, 0, maxSize, maxSize);
+      context.setLineDash([5, 8]);
+
+      for (let rect of rects) {
+        context.beginPath();
+        context.moveTo(0 ,Math.round((rect.top - 1 - y) * devicePixelRatio) + drawOffset);
+        context.lineTo(maxSize, Math.round((rect.top - 1 - y) * devicePixelRatio) + drawOffset);
+        context.moveTo(0 ,Math.round((rect.bottom - 2 - y) * devicePixelRatio) + drawOffset);
+        context.lineTo(maxSize, Math.round((rect.bottom - 2 - y) * devicePixelRatio) + drawOffset);
+
+        context.moveTo(Math.round((rect.left - 1 - x) * devicePixelRatio) + drawOffset, 0);
+        context.lineTo(Math.round((rect.left - 1 - x) * devicePixelRatio) + drawOffset, maxSize);
+        context.moveTo(Math.round((rect.right - 2 - x) * devicePixelRatio) + drawOffset, 0);
+        context.lineTo(Math.round((rect.right - 2 - x) * devicePixelRatio) + drawOffset, maxSize);
+        context.strokeStyle = rect.color;
+        context.stroke();
+      }
+    }
+*/
+  </script>
+</body>
+</html>

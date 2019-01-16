@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<!--
+     Any copyright is dedicated to the Public Domain.
+     http://creativecommons.org/publicdomain/zero/1.0/
+-->
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <title>Transformed grid math</title>
+  <style type="text/css">
+html,body {
+    color:black; background-color:white; font-size:16px; padding:0; margin:0;
+}
+
+.container {
+  border: 2px dashed;
+  height: 150px;
+  width: 400px;
+  transform: translate(10px, 110px) rotate(45deg) scale(0.5);
+}
+
+.grid {
+  display: grid;
+  width: 50px;
+  height: 50px;
+  grid: repeat(2, 100px) / repeat(2, 100px);
+  border: 1px solid;
+  margin: 10px;
+}
+
+.block {
+  border: 2px solid blue;
+  width: 50px;
+  margin: 20px;
+  grid-row: span 2;
+}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="grid">
+    <div class="block"></div>
+  </div>
+</div>
+
+<script>
+let e = document.getElementsByClassName("grid")[0];
+let quad = e.getBoxQuads()[0];
+
+let tl2trVector = { x: (quad.p2.x - quad.p1.x),
+                    y: (quad.p2.y - quad.p1.y) };
+tl2trVector.dist = Math.sqrt((tl2trVector.x * tl2trVector.x) + (tl2trVector.y * tl2trVector.y));
+console.log(tl2trVector);
+let eWidth = e.clientWidth;
+console.log(quad)
+// These values would be computed from getGridFragments, but that's a Chrome-only property, so we cheat here.
+let gridWidth = 200;
+let gridCol1X = 100;
+
+let e2gRatio = gridWidth / eWidth;
+
+let scaledVector = { x: tl2trVector.x * e2gRatio,
+                     y: tl2trVector.y * e2gRatio };
+
+let gridCol1Point = { x: quad.p1.x + (scaledVector.x * (gridCol1X / gridWidth)),
+                      y: quad.p1.y + (scaledVector.y * (gridCol1X / gridWidth)) };
+
+/*
+window.alert("The topmost point of the gridline between columns 0 and 1 should be drawn at (" +
+  gridCol1Point.x + ", " + gridCol1Point.y + ")");*/
+</script>
+
+</body></html>

@@ -188,19 +188,31 @@
         hasUpdated = true;
       }
 
-      if (y < documentHeight - canvasHeight && pageY + viewportHeight > y + canvasHeight - bufferSizeY) {
-        y = Math.min(pageY - bufferSizeY, documentHeight - canvasHeight);
+      let topBoundary = 0;
+      let bottomBoundary = documentHeight - canvasHeight;
+      let leftBoundary = 0;
+      let rightBoundary = documentWidth - canvasWidth;
+
+      // y < pageY + viewportHeight + bufferSizeY - canvasHeight
+      // y > pageY - bufferSizeY
+
+      let topThreshold = pageY - bufferSizeY;
+      let bottomThreshold = pageY - canvasHeight + viewportHeight + bufferSizeY;
+
+      if (y < bottomBoundary && y < bottomThreshold) {
+        y = Math.min(topThreshold, bottomBoundary);
         hasUpdated = true;
-      } else if (y > 0 && pageY - y < bufferSizeY) {
-        y = Math.max(pageY - canvasHeight + viewportHeight + bufferSizeY, 0);
+      } else if (y > topBoundary && y > topThreshold) {
+        y = Math.max(topBoundary, bottomThreshold);
         hasUpdated = true;
       }
-
-      if (x < documentWidth - canvasWidth && pageX + viewportWidth > x + canvasWidth - bufferSizeX) {
-        x = Math.min(pageX - bufferSizeX, documentWidth - canvasWidth);
+      // x < pageX + viewportWidth - canvasWidth + bufferSizeX
+      // x > pageX - bufferSizeX
+      if (x < rightBoundary && pageX + viewportWidth > x + canvasWidth - bufferSizeX) {
+        x = Math.min(pageX - bufferSizeX, rightBoundary);
         hasUpdated = true;
-      } else if (x > 0 && pageX - x < bufferSizeX) {
-        x = Math.max(pageX - canvasWidth + viewportWidth + bufferSizeX, 0);
+      } else if (x > leftBoundary && pageX - x < bufferSizeX) {
+        x = Math.max(leftBoundary, pageX - canvasWidth + viewportWidth + bufferSizeX);
         hasUpdated = true;
       }
 
@@ -227,6 +239,26 @@
 
       return result;
     }, [])
+
+    function _drawGuideLines() {
+      context.clearRect(0, 0, maxSize, maxSize);
+      context.setLineDash([5, 8]);
+
+      for (let rect of rects) {
+        context.beginPath();
+        context.moveTo(0 ,Math.round((rect.top - 1 - y) * devicePixelRatio) + drawOffset);
+        context.lineTo(maxSize, Math.round((rect.top - 1 - y) * devicePixelRatio) + drawOffset);
+        context.moveTo(0 ,Math.round((rect.bottom - 2 - y) * devicePixelRatio) + drawOffset);
+        context.lineTo(maxSize, Math.round((rect.bottom - 2 - y) * devicePixelRatio) + drawOffset);
+
+        context.moveTo(Math.round((rect.left - 1 - x) * devicePixelRatio) + drawOffset, 0);
+        context.lineTo(Math.round((rect.left - 1 - x) * devicePixelRatio) + drawOffset, maxSize);
+        context.moveTo(Math.round((rect.right - 2 - x) * devicePixelRatio) + drawOffset, 0);
+        context.lineTo(Math.round((rect.right - 2 - x) * devicePixelRatio) + drawOffset, maxSize);
+        context.strokeStyle = rect.color;
+        context.stroke();
+      }
+    }
 
     function drawGuideLines() {
       context.clearRect(0, 0, maxSize, maxSize);
